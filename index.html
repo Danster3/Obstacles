@@ -4,29 +4,37 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-        body {
+        /* body {
             margin: 0;
             padding: 0;
             background: #000;
-        }
+        } */
 
-        canvas {
+        /* canvas {
             display: block;
             margin: 0 auto;
             background: #fff;
         }
 
-        /* canvas {
-    border:1px solid #ff0505;
-    background-color: #b6a1a1;
-} */
+        canvas {
+            border: 1px solid #ff0505;
+            background-color: #b6a1a1;
+        } */
     </style>
 </head>
-<canvas></canvas>
+
 
 <body onload="startGame()">
     <script>
 
+        var supportsPassive = false;
+        try {
+            window.addEventListener("test", null, Object.defineProperty({}, 'passive', {
+                get: function () { supportsPassive = true; }
+            }));
+        } catch (e) { }
+
+        var wheelOpt = supportsPassive ? { passive: false } : false;
 
         window.requestAnimFrame = (function () {
             return window.requestAnimationFrame ||
@@ -39,78 +47,51 @@
                 };
         })();
 
+        function noScroll() {
+            window.scrollTo(0, 0);
+        }
+
+        // add listener to disable scroll
+        window.addEventListener('scroll', noScroll);
+
         var myGamePiece;
         var myObstacles = [];
         var mySound;
         var myMusic;
 
-        var dot;
+        var screenHeight = window.screen.height;
+        var screenWidth = window.screen.width;
 
-        var WORLD = {
-
-            init: function () {
-                WORLD.ua = navigator.userAgent.toLowerCase();
-                WORLD.android = WORLD.ua.indexOf('android') > -1 ? true : false;
-                WORLD.ios = (WORLD.ua.indexOf('iphone') > -1 || WORLD.ua.indexOf('ipad') > -1) ? true : false;
-            }
-
-        };
-        WORLD.Input = {
-
-            x: 0,
-            y: 0,
-            tapped: false,
-
-            set: function (data) {
-                this.x = data.pageX;//(data.pageX - WORLD.offset.left) / WORLD.scale;
-                this.y = data.pageY;//(data.pageY - WORLD.offset.top) / WORLD.scale;
-                this.tapped = true;
-                console.log("x" + this.x);
-                console.log("y" + this.y);
-            }
-
-        };
-
-        var xPos ;
-        var yPos ;
-        function moveSquare(data){
-            xPos = data.pageX;  
+        var xPos;
+        var yPos;
+        function moveSquare(data) {
+            xPos = data.pageX;
             yPos = data.pageY
             myGamePiece.x = xPos;
             myGamePiece.y = yPos;
-             //   console.log("x" + xPos);
-             //   console.log("y" + yPos);
+            //   console.log("x" + xPos);
+            //   console.log("y" + yPos);
         }
 
-        window.addEventListener('click', function (e) {
-            e.preventDefault();
-           // WORLD.Input.set(e);
-           // console.log("test1");
-        }, false);
 
         window.addEventListener('touchstart', function (e) {
             e.preventDefault();
-             //WORLD.Input.set(e.touches[0]);
-            //moveSquare(e.touches[0]);
-           // console.log("test2");
         }, false);
 
         window.addEventListener('touchmove', function (e) {
-            e.preventDefault();
-          //  console.log("test3");
+            // e.preventDefault();
             moveSquare(e.touches[0]);
         }, false);
 
         window.addEventListener('touchend', function (e) {
-            e.preventDefault();
-            //console.log("test4");
+            //  e.preventDefault();
         }, false);
 
 
         function startGame() {
             myGamePiece = new component(30, 30, "red", 10, 120);
-            mySound = new sound("bounce.mp3");
-            myMusic = new sound("gametheme.mp3");
+            mySound = new sound("sound/bounce.mp3");
+            myMusic = new sound("sound/Still Woozy - LAVA (Official Video).mp3");
             myMusic.play();
             myGameArea.start();
         }
@@ -118,8 +99,10 @@
         var myGameArea = {
             canvas: document.createElement("canvas"),
             start: function () {
-                this.canvas.width = window.screen.width;
-                this.canvas.height = window.screen.height;
+                this.canvas.width = screenWidth;
+                this.canvas.height = screenHeight;
+                console.log('width: ' + window.screen.width);
+                console.log('height: ' + window.screen.height);
                 this.context = this.canvas.getContext("2d");
                 document.body.insertBefore(this.canvas, document.body.childNodes[0]);
                 this.frameNo = 0;
@@ -209,6 +192,7 @@
             }
             this.stop = function () {
                 this.sound.pause();
+
             }
         }
 
@@ -217,34 +201,13 @@
             return false;
         }
 
-        function moveup() {
-            myGamePiece.speedY = -1;
-        }
-
-        function movedown() {
-            myGamePiece.speedY = 1;
-        }
-
-        function moveleft() {
-            myGamePiece.speedX = -1;
-        }
-
-        function moveright() {
-            myGamePiece.speedX = 1;
-        }
 
         function clearmove() {
             myGamePiece.speedX = 0;
             myGamePiece.speedY = 0;
         }
     </script>
-    <!-- <div style="text-align:center;width:480px;">
-  <button onmousedown="moveup()" onmouseup="clearmove()" ontouchstart="moveup()">UP</button><br><br>
-  <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()">LEFT</button>
-  <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()">RIGHT</button><br><br>
-  <button onmousedown="movedown()" onmouseup="clearmove()" ontouchstart="movedown()">DOWN</button>
 
-</div> -->
 </body>
 
 </html>
